@@ -27,20 +27,23 @@ class EGES_Model:
             embedding_var = tf.Variable(tf.random_uniform((self.feature_lens[i], self.embedding_dim), -1, 1), name='embedding'+str(i),
                                         trainable=True)
             cat_embedding_vars.append(embedding_var)
+
         return cat_embedding_vars
 
     def attention_merge(self):
         embed_list = []
-        num_embed_list = []
+        # num_embed_list = []
         for i in range(self.num_feat):
             cat_embed = tf.nn.embedding_lookup(self.embedding[i], self.inputs[i])
             embed_list.append(cat_embed)
+
         stack_embed = tf.stack(embed_list, axis=-1)
         # attention merge
         alpha_embed = tf.nn.embedding_lookup(self.alpha_embedding, self.inputs[0])
         alpha_embed_expand = tf.expand_dims(alpha_embed, 1)
         alpha_i_sum = tf.reduce_sum(tf.exp(alpha_embed_expand), axis=-1)
         merge_emb = tf.reduce_sum(stack_embed * tf.exp(alpha_embed_expand), axis=-1) / alpha_i_sum
+
         return merge_emb
 
     def input_init(self):
